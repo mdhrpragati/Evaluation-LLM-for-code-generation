@@ -31,23 +31,14 @@ This project introduces:
 
 
 ├── LLmasajudge_benchmarkevaluationmatchingdataset.py  # Benchmark evaluation pipeline
-
 ├── llmmodel_evaluationwithjudgemodel.py              # Model output evaluation pipeline
-
 ├── plotresults.py                                    # Plots for model evaluation
-
 ├── generateresults_benchmarkquality.py               # Plots for benchmark evaluation
-
 ├── evaluation_metrics_qwenjudge.xlsx                 # Aggregated evaluation metrics
-
 ├── evaluation_explanations_qwenjudge.xlsx            # Detailed LLM explanations
-
 ├── audit_resultsfirst_Qwen_.xlsx                    # Benchmark audit results (Qwen)
-
 ├── audit_resultsfirst_mistral_.xlsx                 # Benchmark audit results (Mistral)
-
 ├── audit_resultsfirst_deepseek_*.xlsx                # Benchmark audit results (DeepSeek)
-
 └── README.md                                        # Project documentation
 
 
