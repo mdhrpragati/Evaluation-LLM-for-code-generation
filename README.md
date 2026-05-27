@@ -27,7 +27,6 @@ This project introduces:
 
 ---
 
-
 ## Repository Structure
 
 - LLmasajudge_benchmarkevaluationmatchingdataset.py — Benchmark evaluation pipeline  
@@ -41,6 +40,7 @@ This project introduces:
 - audit_resultsfirst_deepseek_*.xlsx — Benchmark audit results (DeepSeek)  
 - README.md — Project documentation  
 
+---
 
 ## Requirements
 
@@ -56,12 +56,3 @@ Install dependencies:
 
 ```bash
 pip install torch transformers datasets pandas numpy tqdm
-
-## How to Run
-
-### 1. Model Output Evaluation
-
-Run the following script:
-
-```bash
-python llmmodel_evaluationwithjudgemodel.py
