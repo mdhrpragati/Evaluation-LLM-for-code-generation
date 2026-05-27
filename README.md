@@ -53,14 +53,15 @@ This project introduces:
 - tqdm  
 
 
+
 Install dependencies:
 
 ```bash
 pip install torch transformers datasets pandas numpy tqdm
-``
-
+```
 
 ## How to Run
+
 
 This section explains how to run both evaluation pipelines and generate results.
 
