@@ -74,3 +74,27 @@ Run the following script:
 ```bash
 python llmmodel_evaluationwithjudgemodel.py
 
+This will:
+
+- Load code generation models  
+- Generate **5 candidate solutions per problem**  
+- Extract and clean valid Python functions  
+- Evaluate each solution using an LLM judge  
+- Compute performance metrics such as:
+  - average score  
+  - maximum score  
+  - diversity  
+
+Generated output files:
+
+- `evaluation_metrics_qwenjudge.xlsx` — aggregated performance metrics  
+- `evaluation_explanations_qwenjudge.xlsx` — detailed explanations for each evaluated solution  
+
+---
+
+### 2. Benchmark Quality Evaluation
+
+Run the following script:
+
+```bash
+python LLmasajudge_benchmarkevaluationmatchingdataset.py
