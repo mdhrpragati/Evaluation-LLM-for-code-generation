@@ -167,4 +167,22 @@ This project follows a dual evaluation pipeline:
 - HumanEval  
 - HumanEvalNext  
 
+---
+
+## Notes
+
+- GPU is recommended for faster execution  
+- Models and datasets will be downloaded automatically  
+- HuggingFace caching is used internally  
+
+--
+
+## Reproducibility
+
+All results can be reproduced using:
+
+- The provided scripts  
+- HuggingFace datasets  
+- The evaluation setup described in this repository  
+
 
