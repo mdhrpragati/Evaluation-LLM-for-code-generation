@@ -148,3 +148,20 @@ This will generate:
 - Benchmark quality evaluation graphs across dimensions
 
 
+---
+
+## Overall Process
+
+This project follows a dual evaluation pipeline:
+
+### Model Output Evaluation
+- Generates multiple candidate solutions per problem  
+- Uses an LLM to evaluate correctness  
+- Computes aggregate metrics such as average score and diversity  
+
+### Benchmark Quality Evaluation
+- Matches tasks across datasets  
+- Evaluates dataset quality using LLM reasoning  
+- Scores datasets across multiple dimensions  
+``
+
