@@ -52,8 +52,6 @@ This project introduces:
 - NumPy  
 - tqdm  
 
-
-
 Install dependencies:
 
 ```bash
@@ -61,7 +59,6 @@ pip install torch transformers datasets pandas numpy tqdm
 ```
 
 ## How to Run
-
 
 This section explains how to run both evaluation pipelines and generate results.
 
@@ -147,7 +144,6 @@ This will generate:
 - HumanEval vs HumanEvalNext comparison plots
 - Benchmark quality evaluation graphs across dimensions
 
-
 ---
 
 ## Overall Process
@@ -163,5 +159,12 @@ This project follows a dual evaluation pipeline:
 - Matches tasks across datasets  
 - Evaluates dataset quality using LLM reasoning  
 - Scores datasets across multiple dimensions  
-``
+
+---
+
+## Datasets Used
+
+- HumanEval  
+- HumanEvalNext  
+
 
