@@ -114,3 +114,37 @@ This will:
   - solution quality
   - clarity of problem description
 
+Generated output files:
+
+- audit_resultsfirst_Qwen_*.xlsx
+- audit_resultsfirst_mistral_*.xlsx
+- audit_resultsfirst_deepseek_*.xlsx
+
+### 3. Generate Plots:
+
+Run the following script:
+
+```bash
+python plotresults.py
+```
+
+This will generate:
+
+- Model comparison graphs
+- Average score visualizations
+- Performance trends across datasets
+
+### 4. Benchmark Evaluation Results
+
+Run the following script:
+
+```bash
+python generateresults_benchmarkquality.py
+```
+
+This will generate:
+
+- HumanEval vs HumanEvalNext comparison plots
+- Benchmark quality evaluation graphs across dimensions
+
+
