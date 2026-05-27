@@ -41,3 +41,27 @@ This project introduces:
 - audit_resultsfirst_deepseek_*.xlsx — Benchmark audit results (DeepSeek)  
 - README.md — Project documentation  
 
+
+## Requirements
+
+- Python 3.9+
+- PyTorch  
+- Transformers (HuggingFace)  
+- Datasets (HuggingFace)  
+- Pandas  
+- NumPy  
+- tqdm  
+
+Install dependencies:
+
+```bash
+pip install torch transformers datasets pandas numpy tqdm
+
+## How to Run
+
+### 1. Model Output Evaluation
+
+Run the following script:
+
+```bash
+python llmmodel_evaluationwithjudgemodel.py
