@@ -52,11 +52,13 @@ This project introduces:
 - NumPy  
 - tqdm  
 
+
 Install dependencies:
 
 ```bash
 pip install torch transformers datasets pandas numpy tqdm
-'''
+``
+
 
 ## How to Run
 
