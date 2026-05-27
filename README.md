@@ -99,3 +99,18 @@ Run the following script:
 
 ```bash
 python LLmasajudge_benchmarkevaluationmatchingdataset.py
+```
+
+This will:
+- Load HumanEval and HumanEvalNext datasets
+- Match tasks across datasets using:
+  - task identifiers, or
+  - function name matching
+- Ensure evaluation is performed on identical problem instances
+- Use an LLM judge to evaluate each task
+- Assign scores for:
+  - correctness of test cases
+  - coverage of edge cases
+  - solution quality
+  - clarity of problem description
+
