@@ -175,7 +175,7 @@ This project follows a dual evaluation pipeline:
 - Models and datasets will be downloaded automatically  
 - HuggingFace caching is used internally  
 
---
+---
 
 ## Reproducibility
 
