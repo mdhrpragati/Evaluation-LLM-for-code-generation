@@ -56,3 +56,18 @@ Install dependencies:
 
 ```bash
 pip install torch transformers datasets pandas numpy tqdm
+
+
+## How to Run
+
+This section explains how to run both evaluation pipelines and generate results.
+
+---
+
+### 1. Model Output Evaluation
+
+Run the following script:
+
+```bash
+python llmmodel_evaluationwithjudgemodel.py
+
