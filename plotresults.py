@@ -1,11 +1,19 @@
-# =========================
 # Required Imports
-# =========================
 import os
 import re
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+
+# GLOBAL STYLE (FONT SIZE FIX)
+plt.rcParams.update({
+    "font.size": 14,
+    "axes.titlesize": 16,
+    "axes.labelsize": 14,
+    "xtick.labelsize": 12,
+    "ytick.labelsize": 12,
+    "legend.fontsize": 12
+})
 
 
 def generate_all_evaluation_plots(
@@ -16,46 +24,53 @@ def generate_all_evaluation_plots(
     humanevalnext_name="humanevalnext",
     dpi=300
 ):
-    """
-    Reads evaluation Excel files and generates all plots,
-    saving them into structured output directories.
-    """
 
-    # =========================
     # Helper Functions
-    # =========================
     def ensure_dir(path):
         os.makedirs(path, exist_ok=True)
 
     def sanitize_filename(name):
-        return re.sub(r"[\\/:\*\?\"<>\| ]+", "_", name)
+        return re.sub(r"[\\/:\*\?\"<>| ]+", "_", name)
+
+    def clean_model_name(name):
+        return name.split("/")[-1]
 
     def annotate_bars(bars, ax):
         for bar in bars:
             height = bar.get_height()
             ax.annotate(
                 f"{height:.2f}",
-                xy=(bar.get_x() + bar.get_width() / 2, height),
+                xy=(bar.get_x() + bar.get_width()/2, height),
                 xytext=(0, 3),
                 textcoords="offset points",
                 ha="center",
-                va="bottom",
-                fontsize=9
+                fontsize=11
             )
 
-    # =========================
+    # FIXED MODEL ORDER (NO Qwen2.5-3B)
+    MODEL_ORDER = [
+        "aiXcoder-7B",
+        "starcoder2-7b",
+        "CodeLlama-7b-Instruct-hf",
+        "CodeLlama-7b-Python-hf",
+        "deepseek-coder-6.7b-instruct",
+        "Magicoder-S-DS-6.7B",
+        "qwen2.5-coder-7b-instruct",
+        "Mistral-7B-v0.3"
+    ]
+
     # Output Directories
-    # =========================
     judge_output_dir = os.path.join(base_output_dir, "judge_based_plots")
     model_output_dir = os.path.join(base_output_dir, "model_comparison_plots")
     ensure_dir(judge_output_dir)
     ensure_dir(model_output_dir)
 
-    # =====================================================
-    # PART 1: Judge-Based Metrics (HumanEval vs Next)
-    # =====================================================
+    # PART 1: Judge-Based Metrics
     df = pd.read_excel(judge_metrics_file)
     df["dataset"] = df["dataset"].str.lower()
+
+    df["test_model"] = df["test_model"].apply(clean_model_name)
+    df["judge_model"] = df["judge_model"].apply(clean_model_name)
 
     agg_df = (
         df.groupby(["judge_model", "test_model", "dataset"])
@@ -76,46 +91,54 @@ def generate_all_evaluation_plots(
     ]
 
     for judge in agg_df["judge_model"].unique():
+
         judge_df = agg_df[
             (agg_df["judge_model"] == judge) &
             (agg_df["test_model"].str.lower() != "vanilla")
         ]
 
-        test_models = sorted(judge_df["test_model"].unique())
-        if not test_models:
-            continue
+        models = [
+            m for m in MODEL_ORDER
+            if m in judge_df["test_model"].unique() and m != judge
+        ]
 
-        x = np.arange(len(test_models))
+        x = np.arange(len(models))
         width = 0.35
         safe_judge = sanitize_filename(judge)
 
         for metric_col, metric_title in metrics:
-            humaneval_vals = []
-            humanevalnext_vals = []
 
-            for tm in test_models:
-                he = judge_df.query(
-                    "test_model == @tm and dataset == @humaneval_name"
-                )[metric_col]
-                hen = judge_df.query(
-                    "test_model == @tm and dataset == @humanevalnext_name"
-                )[metric_col]
+            he_vals, hen_vals = [], []
 
-                humaneval_vals.append(he.values[0] if not he.empty else 0)
-                humanevalnext_vals.append(hen.values[0] if not hen.empty else 0)
+            for m in models:
+                he = judge_df[
+                    (judge_df["test_model"] == m) &
+                    (judge_df["dataset"] == humaneval_name)
+                ][metric_col]
 
-            fig, ax = plt.subplots(figsize=(10, 6))
-            bars1 = ax.bar(x - width / 2, humaneval_vals, width, label="HumanEval")
-            bars2 = ax.bar(x + width / 2, humanevalnext_vals, width, label="HumanEvalNext")
+                hen = judge_df[
+                    (judge_df["test_model"] == m) &
+                    (judge_df["dataset"] == humanevalnext_name)
+                ][metric_col]
+
+                he_vals.append(he.values[0] if len(he) > 0 else 0)
+                hen_vals.append(hen.values[0] if len(hen) > 0 else 0)
+
+            fig, ax = plt.subplots(figsize=(12, 7))
+
+            bars1 = ax.bar(x - width/2, he_vals, width, label="HumanEval")
+            bars2 = ax.bar(x + width/2, hen_vals, width, label="HumanEvalNext")
 
             annotate_bars(bars1, ax)
             annotate_bars(bars2, ax)
 
             ax.set_xticks(x)
-            ax.set_xticklabels(test_models, rotation=45, ha="right")
+            ax.set_xticklabels(models, rotation=30, ha="right")
+
             ax.set_ylabel(metric_title)
             ax.set_xlabel("Test Model")
-            ax.set_title(f"{metric_title} (Judge Model: {judge})")
+            ax.set_title(f"{metric_title} (Judge: {judge})")
+
             ax.legend()
             ax.grid(axis="y", linestyle="--", alpha=0.6)
 
@@ -127,40 +150,79 @@ def generate_all_evaluation_plots(
             )
             plt.close()
 
-    # =====================================================
-    # PART 2: Model Comparison Metrics
-    # =====================================================
+    # MEAN AVG SCORE (FINAL CONSISTENT PLOT)
+    
+    for judge in agg_df["judge_model"].unique():
+
+        judge_df = agg_df[
+            (agg_df["judge_model"] == judge) &
+            (agg_df["test_model"].str.lower() != "vanilla")
+        ]
+
+        models = [
+            m for m in MODEL_ORDER
+            if m in judge_df["test_model"].unique() and m != judge
+        ]
+
+        x = np.arange(len(models))
+        width = 0.35
+
+        he_vals, hen_vals = [], []
+
+        for m in models:
+            he = judge_df[
+                (judge_df["test_model"] == m) &
+                (judge_df["dataset"] == humaneval_name)
+            ]["mean_avg_score"]
+
+            hen = judge_df[
+                (judge_df["test_model"] == m) &
+                (judge_df["dataset"] == humanevalnext_name)
+            ]["mean_avg_score"]
+
+            he_vals.append(he.values[0] if len(he) > 0 else 0)
+            hen_vals.append(hen.values[0] if len(hen) > 0 else 0)
+
+        fig, ax = plt.subplots(figsize=(12, 7))
+
+        bars1 = ax.bar(x - width/2, he_vals, width, label="HumanEval")
+        bars2 = ax.bar(x + width/2, hen_vals, width, label="HumanEvalNext")
+
+        annotate_bars(bars1, ax)
+        annotate_bars(bars2, ax)
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(models, rotation=30, ha="right")
+
+        ax.set_ylabel("Mean of Average Scores")
+        ax.set_xlabel("Test Model")
+        ax.set_title(f"Mean Average Score (Judge: {judge})")
+
+        ax.legend()
+        ax.grid(axis="y", linestyle="--", alpha=0.6)
+
+        plt.tight_layout()
+
+        safe_judge = sanitize_filename(judge)
+        plt.savefig(
+            os.path.join(judge_output_dir, f"{safe_judge}_mean_avg_score.png"),
+            dpi=dpi,
+            bbox_inches="tight"
+        )
+        plt.close()
+
     df = pd.read_excel(model_metrics_file)
 
-    model_map = {
-        "bigcode/starcoder2-7b": "bigcode/starcoder2-7b",
-        "deepseek-ai/deepseek-coder-6.7b-instruct": "deepseek-ai/deepseek-coder-6.7b-instruct",
-        "qwen/qwen2.5-coder-7b-instruct": "qwen/qwen2.5-coder-7b-instruct",
-        "codellama/codellama-7b-python-hf": "codellama/CodeLlama-7b-Python-hf",
-        "codellama/codellama-7b-instruct-hf": "codellama/CodeLlama-7b-Instruct-hf",
-        "ise-uiuc/magicoder-s-ds-6.7b": "ise-uiuc/Magicoder-S-DS-6.7B",
-        "aixcoder/aixcoder-7b": "aiXcoder/aiXcoder-7B",
-        "mistralai/mistral-7b-v0.3": "mistralai/Mistral-7B-v0.3",
-        "qwen/qwen2.5-3b": "Qwen/Qwen2.5-3B",
-    }
-
-    df["model_clean"] = df["model"].str.lower().str.strip().replace(model_map)
-    df = df[~df["model_clean"].str.contains("vanillaovo")]
+    df["model_clean"] = df["model"].apply(clean_model_name)
 
     x_order = [
-        "aiXcoder/aiXcoder-7B",
-        "bigcode/starcoder2-7b",
-        "codellama/CodeLlama-7b-Instruct-hf",
-        "codellama/CodeLlama-7b-Python-hf",
-        "deepseek-ai/deepseek-coder-6.7b-instruct",
-        "ise-uiuc/Magicoder-S-DS-6.7B",
-        "qwen/qwen2.5-coder-7b-instruct",
-        "qwen/qwen2.5-3B",
-        "mistralai/Mistral-7B-v0.3"
+        m for m in MODEL_ORDER if m in df["model_clean"].unique()
     ]
 
     def plot_metric(metric_name):
+
         metric_df = df[df["evaluation_metric"] == metric_name]
+
         pivot = metric_df.pivot(
             index="model_clean",
             columns="dataset",
@@ -170,18 +232,21 @@ def generate_all_evaluation_plots(
         x = np.arange(len(pivot.index))
         width = 0.35
 
-        fig, ax = plt.subplots(figsize=(14, 6))
-        bars1 = ax.bar(x - width / 2, pivot[humaneval_name], width, label="HumanEval")
-        bars2 = ax.bar(x + width / 2, pivot[humanevalnext_name], width, label="HumanEvalNext")
+        fig, ax = plt.subplots(figsize=(14, 7))
+
+        bars1 = ax.bar(x - width/2, pivot[humaneval_name], width, label="HumanEval")
+        bars2 = ax.bar(x + width/2, pivot[humanevalnext_name], width, label="HumanEvalNext")
 
         annotate_bars(bars1, ax)
         annotate_bars(bars2, ax)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(pivot.index, rotation=45, ha="right")
+        ax.set_xticklabels(pivot.index, rotation=30, ha="right")
+
         ax.set_ylabel(metric_name)
         ax.set_xlabel("Models")
         ax.set_title(f"{metric_name} Comparison")
+
         ax.legend()
         ax.grid(axis="y", linestyle="--", alpha=0.6)
 
@@ -197,8 +262,6 @@ def generate_all_evaluation_plots(
         plot_metric(metric)
 
 
-# =========================
-# Script Entry Point
-# =========================
+# Entry Point
 if __name__ == "__main__":
     generate_all_evaluation_plots()
